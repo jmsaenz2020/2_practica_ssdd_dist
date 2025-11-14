@@ -2,14 +2,10 @@ package taller
 
 import (
   "fmt"
+  "2_practica_ssdd_dist/utils"
 )
 
 const PLAZAS_MECANICO = 2
-const BOLD = "\033[1;37m"
-const RED = "\033[1;31m"
-const YELLOW = "\033[1;33m"
-const BLUE = "\033[1;34m"
-const END = "\033[0m"
 
 type Taller struct{
   Clientes []Cliente
@@ -29,7 +25,7 @@ func (t *Taller)Menu(){
     "Mecánicos disponibles"}
 
   for{
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     
     if status == 0{
       switch opt{
@@ -76,7 +72,7 @@ func (t *Taller)MenuMecanicos(){
       menu = append(menu, m.Info())
     }
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     
     if status == 0{
       switch opt{
@@ -84,12 +80,12 @@ func (t *Taller)MenuMecanicos(){
           m.Inicializar()
           t.CrearMecanico(m.Nombre, m.Especialidad, m.Experiencia)
           if !m.Valido() {
-            errorMsg("No se ha creado el mecánico")
+            utils.ErrorMsg("No se ha creado el mecánico")
           }
         case 2:
           for {
             fmt.Println("Introduzca el ID del mecánico")
-            leerInt(&id)
+            utils.LeerInt(&id)
             m = t.ObtenerMecanicoPorId(id)
             if m.Valido(){
               t.EliminarMecanico(m)
@@ -119,7 +115,7 @@ func (t *Taller)MenuClientes(){
       menu = append(menu, c.Info())
     }
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     
     if status == 0{
       switch opt{
@@ -127,12 +123,12 @@ func (t *Taller)MenuClientes(){
           c.Inicializar()
           t.CrearCliente(c)
           if !c.Valido() {
-            errorMsg("No se ha creado el cliente")
+            utils.ErrorMsg("No se ha creado el cliente")
           }
         case 2:
           for {
             fmt.Println("Introduzca el ID del cliente")
-            leerInt(&id)
+            utils.LeerInt(&id)
             c = t.ObtenerClientePorId(id)
             if c.Valido(){
               t.EliminarCliente(c)
@@ -175,7 +171,7 @@ func (t *Taller)AsignarPlaza(v Vehiculo){
       if !p.Valido(){
         t.Plazas[i] = v
         msg := fmt.Sprintf("Vehiculo asignado a la plaza %d", i + 1)
-        infoMsg(msg)
+        utils.InfoMsg(msg)
         return
       }
     }
@@ -201,12 +197,12 @@ func (t *Taller)Asignar(){
   var v Vehiculo
 
   if len(matriculas) > 0{
-    fmt.Println(BOLD + "VEHICULOS DISPONIBLES" + END)
+    utils.BoldMsg("VEHICULOS DISPONIBLES")
     for _, m := range matriculas{
       fmt.Println(m)
     }
     fmt.Println("Escriba la matrícula del vehículo a asignar")
-    leerInt(&num)
+    utils.LeerInt(&num)
     for _, c := range t.Clientes{
       v = c.ObtenerVehiculoPorMatricula(num)
       if v.Valido(){
@@ -214,7 +210,7 @@ func (t *Taller)Asignar(){
       }
     }
   } else {
-    warningMsg("No hay incidencias en el taller")
+    utils.WarningMsg("No hay incidencias en el taller")
   }
 }
 
@@ -235,7 +231,7 @@ func (t *Taller)CrearMecanico(nombre string, especialidad int, experiencia int){
     t.Plazas = append(t.Plazas, v)
     t.Plazas = append(t.Plazas, v)
   } else {
-    errorMsg("No se ha podido crear al mecanico")
+    utils.ErrorMsg("No se ha podido crear al mecanico")
   }
 }
 
@@ -254,7 +250,7 @@ func (t *Taller)EliminarMecanico(m Mecanico){
     lista = lista[:indice+copy(lista[indice:], lista[indice+1:])]
     t.Mecanicos = lista
   } else {
-    errorMsg("No se pudo eliminar al mecánico")
+    utils.ErrorMsg("No se pudo eliminar al mecánico")
   }
 }
 
@@ -266,7 +262,7 @@ func (t *Taller)EliminarCliente(c Cliente){
     lista = lista[:indice+copy(lista[indice:], lista[indice+1:])]
     t.Clientes = lista
   } else {
-    errorMsg("No se pudo eliminar al mecánico")
+    utils.ErrorMsg("No se pudo eliminar al mecánico")
   }
 }
 
@@ -389,31 +385,31 @@ type Cliente struct{
 func (c *Cliente)Inicializar(){
   var exit bool = false
 
-  fmt.Printf("%sID%s\n", BOLD, END)
-  leerInt(&c.Id)
+  utils.BoldMsg("ID")
+  utils.LeerInt(&c.Id)
   if c.Id == 0{
     exit = true
   }
 
   if !exit{
-    fmt.Printf("%sNombre%s\n", BOLD, END)
-    leerStr(&c.Nombre)
+    utils.BoldMsg("Nombre")
+    utils.LeerStr(&c.Nombre)
     if len(c.Nombre) == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sTeléfono%s\n", BOLD, END)
-    leerInt(&c.Telefono)
+    utils.BoldMsg("Telefono")
+    utils.LeerInt(&c.Telefono)
     if c.Telefono == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sEmail%s\n", BOLD, END)
-    leerStr(&c.Email)
+    utils.BoldMsg("Email")
+    utils.LeerStr(&c.Email)
     if len(c.Email) == 0{
       exit = true
     }
@@ -430,11 +426,11 @@ func (c Cliente)Info() (string){
 }
 
 func (c Cliente)Visualizar(){
-  fmt.Printf("%sID: %s%08d\n", BOLD, END, c.Id)
-  fmt.Printf("%sNombre: %s%s\n", BOLD, END, c.Nombre)
-  fmt.Printf("%sTeléfono: %s%09d\n", BOLD, END, c.Telefono)
-  fmt.Printf("%sEmail: %s%s\n", BOLD, END, c.Email)
-  fmt.Printf("%sVehiculos:%s\n", BOLD, END)
+  fmt.Printf("%sID: %s%08d\n", utils.BOLD, utils.END, c.Id)
+  fmt.Printf("%sNombre: %s%s\n", utils.BOLD, utils.END, c.Nombre)
+  fmt.Printf("%sTeléfono: %s%09d\n", utils.BOLD, utils.END, c.Telefono)
+  fmt.Printf("%sEmail: %s%s\n", utils.BOLD, utils.END, c.Email)
+  fmt.Printf("%sVehiculos:%s\n", utils.BOLD, utils.END)
   c.ListarVehiculos()
 }
 
@@ -454,7 +450,7 @@ func (c *Cliente)MenuVehiculos(){
       menu = append(menu, v.Info())
     }
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
 
     if status == 0{
       if opt == 1{
@@ -475,17 +471,17 @@ func (c *Cliente)CrearVehiculo(v Vehiculo){
   if v.Valido() && c.ObtenerIndiceVehiculo(v) == -1{
     c.Vehiculos = append(c.Vehiculos, v)
   } else {
-    errorMsg("No se ha podido crear el vehículo")
+    utils.ErrorMsg("No se ha podido crear el vehículo")
   }
 }
 
 func (c Cliente)ListarVehiculos(){
   if len(c.Vehiculos) > 0{
     for _, v := range c.Vehiculos{
-      fmt.Printf("  %s·%s%s\n", BOLD, END, v.Info())
+      fmt.Printf("  %s·%s%s\n", utils.BOLD, utils.END, v.Info())
     }
   } else {
-    fmt.Println(BOLD + "  SIN VEHICULOS" + END)
+    utils.BoldMsg("SIN VEHICULOS")
   }
 }
 
@@ -498,7 +494,7 @@ func (c *Cliente)Menu(){
   for{
     menu[0] = fmt.Sprintf("Menu de %s", c.Nombre)
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
 
     if status == 0{
       switch opt{
@@ -528,25 +524,25 @@ func (c *Cliente)Modificar(){
 
   for{
     menu[0] = fmt.Sprintf("Modificar datos de %s", c.Nombre)
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     if status == 0{
       switch opt{
         case 1:
-          leerInt(&num)
+          utils.LeerInt(&num)
           c.Id = num
-          infoMsg("ID modificado")
+          utils.InfoMsg("ID modificado")
         case 2:
-          leerStr(&buf)
+          utils.LeerStr(&buf)
           c.Nombre = buf
-          infoMsg("Nombre modificado")
+          utils.InfoMsg("Nombre modificado")
         case 3:
-          leerInt(&num)
+          utils.LeerInt(&num)
           c.Telefono = num
-          infoMsg("Teléfono modificado")
+          utils.InfoMsg("Teléfono modificado")
         case 4:
-          leerStr(&buf)
+          utils.LeerStr(&buf)
           c.Email = buf
-          infoMsg("Email modificado")
+          utils.InfoMsg("Email modificado")
         case 5:
           c.MenuVehiculos()
       }
@@ -615,11 +611,11 @@ func (v Vehiculo)Info() (string){
 }
 
 func (v Vehiculo)Visualizar(){
-  fmt.Printf("%sMatricula: %s%05d\n", BOLD, END, v.Matricula)
-  fmt.Printf("%sMarca: %s%s\n", BOLD, END, v.Marca)
-  fmt.Printf("%sModelo: %s%s\n", BOLD, END, v.Modelo)
-  fmt.Printf("%sFecha de entrada: %s%s\n", BOLD, END, v.FechaEntrada)
-  fmt.Printf("%sFecha estimada de entrada: %s%s\n", BOLD, END, v.FechaSalida)
+  fmt.Printf("%sMatricula: %s%05d\n", utils.BOLD, utils.END, v.Matricula)
+  fmt.Printf("%sMarca: %s%s\n", utils.BOLD, utils.END, v.Marca)
+  fmt.Printf("%sModelo: %s%s\n", utils.BOLD, utils.END, v.Modelo)
+  fmt.Printf("%sFecha de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaEntrada)
+  fmt.Printf("%sFecha estimada de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaSalida)
   // Incidencias
 }
 
@@ -632,7 +628,7 @@ func (v *Vehiculo)Menu(){
   for{
     menu[0] = fmt.Sprintf("Menu de %s", v.Info())
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
 
     if status == 0{
       switch opt{
@@ -652,46 +648,46 @@ func (v *Vehiculo)Menu(){
 func (v *Vehiculo)Inicializar(){
   var exit bool = false
 
-  fmt.Printf("%sMatricula%s\n", BOLD, END)
-  leerInt(&v.Matricula)
+  utils.BoldMsg("Matrícula")
+  utils.LeerInt(&v.Matricula)
   if v.Matricula == 0{
     exit = true
   }
 
   if !exit{
-    fmt.Printf("%sMarca%s\n", BOLD, END)
-    leerStr(&v.Marca)
+    utils.BoldMsg("Marca")
+    utils.LeerStr(&v.Marca)
     if len(v.Marca) == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sModelo%s\n", BOLD, END)
-    leerStr(&v.Modelo)
+    utils.BoldMsg("Modelo")
+    utils.LeerStr(&v.Modelo)
     if len(v.Modelo) == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sFecha de entrada%s\n", BOLD, END)
-    leerStr(&v.FechaEntrada)
+    utils.BoldMsg("Fecha de entrada")
+    utils.LeerStr(&v.FechaEntrada)
     if len(v.FechaEntrada) == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sFecha estimada de salida%s\n", BOLD, END)
-    leerStr(&v.FechaSalida)
+    utils.BoldMsg("Fecha de estimada de salida")
+    utils.LeerStr(&v.FechaSalida)
     if len(v.FechaSalida) == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sIncidencias:%s\n", BOLD, END)
+    utils.BoldMsg("Incidencias")
     v.MenuIncidencias()
   }
 }
@@ -710,25 +706,25 @@ func (v *Vehiculo)Modificar(){
 
   for{
     menu[0] = fmt.Sprintf("Modificar datos de %s", v.Info())
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     if status == 0{
       switch opt{
         case 1:
-          leerInt(&num)
+          utils.LeerInt(&num)
           v.Matricula = num
-          infoMsg("Matricula modificada")
+          utils.InfoMsg("Matricula modificada")
         case 2:
-          leerStr(&buf)
+          utils.LeerStr(&buf)
           v.Marca = buf
-          leerStr(&buf)
+          utils.LeerStr(&buf)
           v.Modelo = buf
-          infoMsg("Marca y modelo modificado")
+          utils.InfoMsg("Marca y modelo modificado")
         case 3:
-          leerFecha(&v.FechaEntrada)
-          infoMsg("Fecha de entrada modificada")
+          utils.LeerFecha(&v.FechaEntrada)
+          utils.InfoMsg("Fecha de entrada modificada")
         case 4:
-          leerFecha(&v.FechaSalida)
-          infoMsg("Fecha estimada de salida modificada")
+          utils.LeerFecha(&v.FechaSalida)
+          utils.InfoMsg("Fecha estimada de salida modificada")
         case 5:
           v.MenuIncidencias()
       }
@@ -754,7 +750,7 @@ func (v *Vehiculo)MenuIncidencias(){
       menu = append(menu, i.Info())
     }
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
 
     if status == 0{
       if opt == 1{
@@ -787,7 +783,7 @@ func (v *Vehiculo)CrearIncidencia(i Incidencia){
   if i.Valido() && v.ObtenerIndiceIncidencia(i) == -1{
     v.Incidencias = append(v.Incidencias, i)
   } else {
-    errorMsg("No se ha podido crear el vehículo")
+    utils.ErrorMsg("No se ha podido crear el vehículo")
   }
 }
 
@@ -814,11 +810,11 @@ func (i Incidencia)Info() (string){
 }
 
 func (i Incidencia)Visualizar(){
-  fmt.Printf("%sId: %s%03d\n", BOLD, END, i.Id)
-  fmt.Printf("%sMarca: %s%d\n", BOLD, END, i.Tipo)
-  fmt.Printf("%sModelo: %s%d\n", BOLD, END, i.Prioridad)
-  fmt.Printf("%sFecha de entrada: %s%s\n", BOLD, END, i.Descripcion)
-  fmt.Printf("%sFecha estimada de entrada: %s%d\n", BOLD, END, i.Estado)
+  fmt.Printf("%sId: %s%03d\n", utils.BOLD, utils.END, i.Id)
+  fmt.Printf("%sMarca: %s%d\n", utils.BOLD, utils.END, i.Tipo)
+  fmt.Printf("%sModelo: %s%d\n", utils.BOLD, utils.END, i.Prioridad)
+  fmt.Printf("%sFecha de entrada: %s%s\n", utils.BOLD, utils.END, i.Descripcion)
+  fmt.Printf("%sFecha estimada de entrada: %s%d\n", utils.BOLD, utils.END, i.Estado)
   // Mecanicos
 }
 
@@ -831,7 +827,7 @@ menu := []string{
 for{
   menu[0] = fmt.Sprintf("Menu de %s", i.Info())
 
-  opt, status := menuFunc(menu)
+  opt, status := utils.MenuFunc(menu)
 
   if status == 0{
     switch opt{
@@ -851,8 +847,8 @@ for{
 func (i *Incidencia)Inicializar(){
   var exit bool = false
 
-  fmt.Printf("%sID%s\n", BOLD, END)
-  leerInt(&i.Id)
+  utils.BoldMsg("ID")
+  utils.LeerInt(&i.Id)
   if i.Id == 0{
     exit = true
   }
@@ -864,7 +860,7 @@ func (i *Incidencia)Inicializar(){
         "Mecánica",
         "Electrónica",
         "Carrocería"}
-      opt, status := menuFunc(menu_esp)
+      opt, status := utils.MenuFunc(menu_esp)
       if status == 0{
         i.Tipo = opt - 1
         break
@@ -876,16 +872,16 @@ func (i *Incidencia)Inicializar(){
   }
 
   if !exit{
-    fmt.Printf("%sPrioridad%s\n", BOLD, END)
-    leerInt(&i.Prioridad)
+  utils.BoldMsg("Prioridad")
+    utils.LeerInt(&i.Prioridad)
     if i.Prioridad == 0{
       exit = true
     }
   }
 
   if !exit{
-    fmt.Printf("%sDescripción%s\n", BOLD, END)
-    leerStr(&i.Descripcion)
+  utils.BoldMsg("Descripción")
+    utils.LeerStr(&i.Descripcion)
     if len(i.Descripcion) == 0{
       exit = true
     } else {
@@ -925,7 +921,7 @@ func (m *Mecanico)Menu(){
   for{
     menu[0] = fmt.Sprintf("Menu de %s", m.Nombre)
 
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
 
     if status == 0{
       switch opt{
@@ -945,8 +941,8 @@ func (m *Mecanico)Menu(){
 func (m *Mecanico)Inicializar(){
   var exit bool = false  
 
-  fmt.Printf("%sNombre%s\n", BOLD, END)
-  leerStr(&m.Nombre)
+  utils.BoldMsg("Nombre")
+  utils.LeerStr(&m.Nombre)
   if len(m.Nombre) == 0{
     exit = true
   }
@@ -958,7 +954,7 @@ func (m *Mecanico)Inicializar(){
     "Electrónica",
     "Carrocería"}
     for{
-      opt, status := menuFunc(menu_esp)
+      opt, status := utils.MenuFunc(menu_esp)
       if status != 1{
         if status == 0{
           m.Especialidad = opt - 1
@@ -971,8 +967,8 @@ func (m *Mecanico)Inicializar(){
   }
 
   if !exit{
-    fmt.Printf("%sExperiencia%s\n", BOLD, END)
-    leerInt(&m.Experiencia)
+    utils.BoldMsg("Experiencia")
+    utils.LeerInt(&m.Experiencia)
     m.Id = 1
   }
 }
@@ -982,11 +978,11 @@ func (m Mecanico)Info() (string){
 }
 
 func (m Mecanico)Visualizar(){
-  fmt.Printf("%sID: %s%03d\n", BOLD, END, m.Id)
-  fmt.Printf("%sNombre: %s%s\n", BOLD, END, m.Nombre)
-  fmt.Printf("%sEspecialidad: %s%s\n", BOLD, END, m.ObtenerEspecialidad())
-  fmt.Printf("%sExperiencia: %s%d años\n", BOLD, END, m.Experiencia)
-  fmt.Printf("%s¿Está de alta? %s%t\n", BOLD, END, m.Alta)
+  fmt.Printf("%sID: %s%03d\n", utils.BOLD, utils.END, m.Id)
+  fmt.Printf("%sNombre: %s%s\n", utils.BOLD, utils.END, m.Nombre)
+  fmt.Printf("%sEspecialidad: %s%s\n", utils.BOLD, utils.END, m.ObtenerEspecialidad())
+  fmt.Printf("%sExperiencia: %s%d años\n", utils.BOLD, utils.END, m.Experiencia)
+  fmt.Printf("%s¿Está de alta? %s%t\n", utils.BOLD, utils.END, m.Alta)
 }
 
 func (m Mecanico)Valido() (bool){
@@ -1015,33 +1011,33 @@ func (m *Mecanico)Modificar(){
       menu[len(menu) - 1] = "Dar de baja"
     }
     menu[0] = fmt.Sprintf("Modificar datos de %s", m.Nombre)
-    opt, status := menuFunc(menu)
+    opt, status := utils.MenuFunc(menu)
     if status == 0{
       switch opt{
         case 1:
-          leerStr(&buf)
+          utils.LeerStr(&buf)
           m.Nombre = buf
-          infoMsg("Nombre modificado")
+          utils.InfoMsg("Nombre modificado")
         case 2:
           menu_esp := []string{
             "Selecciona especialidad",
             "Mecánica",
             "Electrónica",
             "Carrocería"}
-          opt, status = menuFunc(menu_esp)
+          opt, status = utils.MenuFunc(menu_esp)
           if status == 0{
             esp := m.ObtenerEspecialidad()
             m.Especialidad = opt - 1
             msg := fmt.Sprintf("Especialidad modificada: %s->%s", esp, m.ObtenerEspecialidad())
-            infoMsg(msg)
+            utils.InfoMsg(msg)
           }
         case 3:
-          leerInt(&num)
+          utils.LeerInt(&num)
           m.Experiencia = num
-          infoMsg("Experiencia modificada")
+          utils.InfoMsg("Experiencia modificada")
         case 4:
           m.Alta = !m.Alta
-          infoMsg("Estado modificado")
+          utils.InfoMsg("Estado modificado")
       }
     } else if status == 2{
       break
@@ -1061,83 +1057,3 @@ func (m Mecanico)ObtenerEspecialidad() (string){
       return "Sin especialidad"
   }
 }
-
-
-func errorMsg(msg string){
-  fmt.Printf("%s%s%s\n", RED, msg, END)
-}
-
-func warningMsg(msg string){
-  fmt.Printf("%s%s%s\n", YELLOW, msg, END)
-}
-
-func infoMsg(msg string){
-  fmt.Printf("%s%s%s\n", BLUE, msg, END)
-}
-
-func leerFecha(aux *string){
-  var dia int
-  var mes int
-  var anyo int
-
-  for{
-    fmt.Println("Día")
-    leerInt(&dia)
-    fmt.Println("Mes")
-    leerInt(&mes)
-    fmt.Println("Año")
-    leerInt(&anyo)
-    
-    if (dia > 0 && dia <= 31 && mes > 0 && mes <= 12 && anyo > 0){
-      *aux = fmt.Sprintf("%d-%d-%d", dia, mes, anyo)
-      return
-    } else if (dia == 0 && mes == 0 && anyo == 0){
-      return
-    }
-  }
-}
-
-func leerInt(i *int){
-  for{
-    fmt.Print("> ")
-    fmt.Scanf("%d", i)
-    if *i >= 0{
-      break
-    } else {
-      warningMsg("Valor entero inválido")
-    }
-  }
-}
-
-func leerStr(str *string){
-  for{
-    fmt.Print("> ")
-    fmt.Scanf("%s", str)
-    if len(*str) > 0{
-      break
-    } else {
-      warningMsg("Cadena de texto inválida")
-    }
-  }
-}
-
-func menuFunc(menu []string) (int, int){
-  var opt int
-
-  menu = append(menu, "Salir")
-  fmt.Printf("%s%s%s\n", BOLD, menu[0], END) // Menu title
-
-  for i:= 1; i < len(menu); i++{
-    fmt.Printf("%d.- %s\n", i, menu[i])
-  }
-
-  leerInt(&opt)
-
-  if opt > 0 && opt < len(menu) - 1{
-    return opt, 0
-  } else if opt == len(menu) - 1{
-    return opt, 2
-  }
-  return 0, 1
-}
-

@@ -23,6 +23,10 @@ func InfoMsg(msg string){
   fmt.Printf("%s%s%s\n", BLUE, msg, END)
 }
 
+func BoldMsg(msg string){
+  fmt.Printf("%s%s%s\n", BOLD, msg, END)
+}
+
 func LeerFecha(aux *string){
   var dia int
   var mes int
