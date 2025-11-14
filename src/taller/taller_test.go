@@ -4,9 +4,9 @@ import (
   "testing"
 )
 
-func getDefaults()(Taller){
-  var defaults Taller
-  defaults.CrearMecanico("Pepe", 0, 0)
+func TestCopia(test *testing.T){
+  var taller Taller
+  taller.CrearMecanico("Pepe", 0, 0)
   c := Cliente{Id: 1, Nombre: "Laura", Telefono: 1, Email: "laura27@mail.com"}
   v := Vehiculo{Matricula: 1234, Marca: "Toyota", Modelo: "Camry", FechaEntrada: "14-04-2009", FechaSalida: "19-04-2009"}
   i := Incidencia{Id: 1, Tipo: 1, Prioridad: 1, Descripcion: "Luna delantera rota", Estado: 1}
@@ -14,14 +14,12 @@ func getDefaults()(Taller){
   c.CrearVehiculo(v)
   v = Vehiculo{Matricula: 1235, Marca: "Toyota", Modelo: "Camry", FechaEntrada: "14-04-2009", FechaSalida: "19-04-2009"}
   c.CrearVehiculo(v)
-  defaults.CrearCliente(c)
-  defaults.AsignarPlaza(c.Vehiculos[0])
-  defaults.AsignarPlaza(c.Vehiculos[1])
+  taller.CrearCliente(c)
+  for _, v := range c.Vehiculos{
+    taller.AsignarPlaza(v)
+  }
   
-  return defaults
-}
-
-func Benchmark(b *testing.B){
-  t := getDefaults()
-  t.Estado()
+  if len(taller.ObtenerMatriculaVehiculos()) != 1{
+    test.Errorf("ERROR: No se pudo detectar la copia")
+  }
 }

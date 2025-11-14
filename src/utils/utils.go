@@ -4,7 +4,6 @@ import (
   "fmt"
 )
 
-const PLAZAS_MECANICO = 2
 const BOLD = "\033[1;37m"
 const RED = "\033[1;31m"
 const YELLOW = "\033[1;33m"
