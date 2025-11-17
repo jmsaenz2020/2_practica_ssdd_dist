@@ -7,6 +7,7 @@ import (
 const BOLD = "\033[1;37m"
 const RED = "\033[1;31m"
 const YELLOW = "\033[1;33m"
+const GREEN = "\033[1;32m"
 const BLUE = "\033[1;34m"
 const END = "\033[0m"
 

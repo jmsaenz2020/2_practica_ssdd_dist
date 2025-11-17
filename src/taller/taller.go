@@ -14,10 +14,37 @@ type Taller struct{
   UltimoId int
 }
 
+
+func (t *Taller)MenuPrincipal(){
+  menu := []string{
+    "Menu principal",
+    "Taller",
+    "Clientes",
+    "Mecánicos"}
+
+  for{
+    opt, status := utils.MenuFunc(menu)
+    
+    if status == 0{
+      switch opt{
+        case 1:
+          t.Menu()
+        case 2:
+          t.MenuClientes()
+        case 3:
+          t.MenuMecanicos()
+      }
+    } else if status == 2{
+      break
+    }
+  }
+}
+
 func (t *Taller)Menu(){
   menu := []string{
     "Menu del taller",
     "Asignar vehiculo",
+    "Asignar mecánico",
     "Estado del taller",
     "Listar incidencias",
     "Listar clientes con vehiculos en el taller",
@@ -30,24 +57,30 @@ func (t *Taller)Menu(){
     if status == 0{
       switch opt{
         case 1:
-          t.Asignar()
+          t.AsignarVehiculo()
         case 2:
-          t.Estado()
+          t.AsignarMecanico()
         case 3:
+          t.Estado()
+        case 4:
           incidencias := t.ObtenerIncidencias()
 
           for _, inc := range incidencias{
             fmt.Println(inc.Info())
           }
-        case 4:
+        case 5:
           clientes := t.ObtenerClientesEnTaller()
 
           for _, c := range clientes{
             fmt.Println(c.Info())
           }
-        case 5:
-          // Incidencias por mecánico
         case 6:
+          if len(t.Mecanicos) > 0{
+            t.IncidenciasMecanico()
+          } else {
+            utils.WarningMsg("No hay mecánicos en el taller")
+          }
+        case 7:
           t.MecanicosDisponibles()
         default:
           continue
@@ -101,6 +134,29 @@ func (t *Taller)MenuMecanicos(){
   }
 }
 
+func (t Taller)SeleccionarMecanico() (Mecanico){
+  var menu []string
+  var m Mecanico
+
+  for{
+    menu = []string{"Selecciona un mecánico"}
+    for _, m := range t.Mecanicos{
+      menu = append(menu, m.Info())
+    }
+
+    opt, status := utils.MenuFunc(menu)
+    
+    if status != 1{
+      if status == 0{
+        m = t.Mecanicos[opt - 1]
+      }
+      break
+    }
+  }
+
+  return m
+}
+
 func (t *Taller)MenuClientes(){
   var menu []string
   var c Cliente
@@ -144,25 +200,10 @@ func (t *Taller)MenuClientes(){
   }
 }
 
-func (t Taller)ListarIncidencias(){
-}
+func (t Taller)HayEspacio() (bool){
+  vehiculos := t.ObtenerPlazas()
 
-func (t Taller)ObtenerMatriculaVehiculos() ([]int){
-  var matriculas []int
-
-  for _, c := range t.Clientes{
-    for _, v := range c.Vehiculos{
-      if len(v.Incidencias) > 0{
-        matriculas = append(matriculas, v.Matricula)
-      }
-    }
-  }
-
-  return matriculas
-}
-
-func(t Taller)HayEspacio() (bool){
-  return len(t.Plazas) <= PLAZAS_MECANICO*len(t.Mecanicos)
+  return len(vehiculos) < PLAZAS_MECANICO*len(t.Mecanicos)
 }
 
 func (t *Taller)AsignarPlaza(v Vehiculo){
@@ -185,18 +226,19 @@ func (t Taller)Estado(){
     fmt.Printf("%d.- ", i + 1)
     v = t.Plazas[i]
     if v.Valido(){
-      fmt.Print(v.Info())
+      fmt.Printf("%s %s", v.StringEstado(), v.Info())
     }
     fmt.Println() 
   }
 }
 
-func (t *Taller)Asignar(){
+func (t *Taller)AsignarVehiculo(){
   matriculas := t.ObtenerMatriculaVehiculos()
   var num int
   var v Vehiculo
+  var hayEspacio bool = t.HayEspacio()
 
-  if len(matriculas) > 0{
+  if len(matriculas) > 0 && hayEspacio{
     utils.BoldMsg("VEHICULOS DISPONIBLES")
     for _, m := range matriculas{
       fmt.Println(m)
@@ -209,8 +251,47 @@ func (t *Taller)Asignar(){
         t.AsignarPlaza(v)
       }
     }
+  } else if !hayEspacio{
+    utils.WarningMsg("El taller está lleno")
   } else {
     utils.WarningMsg("No hay incidencias en el taller")
+  }
+}
+
+func (t *Taller)AsignarMecanico(){
+  menu := []string{"Seleccione un vehículo"}
+  var plaza Vehiculo
+
+  plazas := t.ObtenerPlazas()
+
+  for _, p := range plazas{
+    menu = append(menu, p.Info())
+  }    
+
+  for {
+    if len(menu) > 1{
+      opt, status := utils.MenuFunc(menu)
+
+      if status == 0{
+        plaza = plazas[opt - 1]
+        if len(plaza.Incidencias) > 0{
+          inc := plaza.ObtenerIncidencia()
+          if inc.Valido(){
+            m := t.SeleccionarMecanico()
+            if m.Valido(){
+              inc.AsignarMecanico(m)
+            }
+          }
+        } else {
+          utils.WarningMsg("El vehiculo no tiene incidencias")
+        }
+      } else if status == 2{
+        break
+      }
+    } else {
+      utils.WarningMsg("No hay vehículos en el taller")
+      break
+    }
   }
 }
 
@@ -355,6 +436,70 @@ func (t Taller)ObtenerClientesEnTaller() ([]Cliente){
   }
 
   return clientes
+}
+
+func (t Taller)ObtenerMatriculaVehiculos() ([]int){
+  var matriculas []int
+
+  for _, c := range t.Clientes{
+    for _, v := range c.Vehiculos{
+      if len(v.Incidencias) > 0{
+        matriculas = append(matriculas, v.Matricula)
+      }
+    }
+  }
+
+  return matriculas
+}
+
+func (t Taller)ObtenerPlazas() ([]Vehiculo){
+  var vehiculos []Vehiculo
+
+  for _, p := range t.Plazas{
+    if p.Valido(){
+      vehiculos = append(vehiculos, p)
+    }
+  }
+
+  return vehiculos
+}
+
+func (t Taller)ObtenerIncidenciasMecanico(m_in Mecanico) ([]Incidencia){
+  var incidencias []Incidencia
+
+  for _, inc := range incidencias{
+    if inc.TieneMecanico(m_in){
+      incidencias = append(incidencias, inc)
+    }
+  }
+
+  return incidencias
+}
+
+func (t Taller)IncidenciasMecanico(){
+  menu := []string{"Seleccione el mecánico"}
+
+  for _, m := range t.Mecanicos{
+    menu = append(menu, m.Info())
+  }
+
+  for{
+    opt, status := utils.MenuFunc(menu)
+
+    if status != 1{
+      if status == 0{
+        incidencias := t.ObtenerIncidenciasMecanico(t.Mecanicos[opt - 1])
+        if len(incidencias) == 0{
+          utils.BoldMsg("SIN INCIDENCIAS")
+        } else {
+          for _, inc := range incidencias{
+            fmt.Println(inc.Info())
+          }
+        }
+      }
+      break
+    }
+  }
 }
 
 func (t Taller)MecanicosDisponibles(){

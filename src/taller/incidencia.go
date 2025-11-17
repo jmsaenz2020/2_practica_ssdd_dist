@@ -20,11 +20,19 @@ func (i Incidencia)Info() (string){
 
 func (i Incidencia)Visualizar(){
   fmt.Printf("%sId: %s%03d\n", utils.BOLD, utils.END, i.Id)
-  fmt.Printf("%sMarca: %s%d\n", utils.BOLD, utils.END, i.Tipo)
-  fmt.Printf("%sModelo: %s%d\n", utils.BOLD, utils.END, i.Prioridad)
-  fmt.Printf("%sFecha de entrada: %s%s\n", utils.BOLD, utils.END, i.Descripcion)
-  fmt.Printf("%sFecha estimada de entrada: %s%d\n", utils.BOLD, utils.END, i.Estado)
-  // Mecanicos
+  fmt.Printf("%sTipo: %s%d\n", utils.BOLD, utils.END, i.Tipo)
+  fmt.Printf("%sPrioridad: %s%d\n", utils.BOLD, utils.END, i.Prioridad)
+  fmt.Printf("%sDescripción: %s%s\n", utils.BOLD, utils.END, i.Descripcion)
+  fmt.Printf("%sEstado: %s%d\n", utils.BOLD, utils.END, i.Estado)
+  utils.BoldMsg("MECÁNICOS")
+  if len(i.Mecanicos) > 0{
+    for _, m := range i.Mecanicos{
+      fmt.Printf("  ·", m.Info())
+    }
+    fmt.Println()
+  } else {
+    utils.BoldMsg("SIN MECÁNICOS")
+  }
 }
 
 func (i *Incidencia)Menu(){
@@ -101,7 +109,36 @@ func (i *Incidencia)Inicializar(){
 }
 
 func (i *Incidencia)Modificar(){
+  
+  menu := []string{
+    "Modificar datos de incidencia",
+    "Tipo",
+    "Prioridad",
+    "Descripción"}
+  var buf string
+  var num int
 
+  for{
+    opt, status := utils.MenuFunc(menu)
+    if status == 0{
+      switch opt{
+        case 1:
+          utils.LeerInt(&num)
+          i.Tipo = num
+          utils.InfoMsg("Tipo de incidencia modificado")
+        case 2:
+          utils.LeerInt(&num)
+          i.Prioridad = num
+          utils.InfoMsg("Prioridad modificada")
+        case 3:
+          utils.LeerStr(&buf)
+          i.Descripcion = buf
+          utils.InfoMsg("Descripción modificada")
+      }
+    } else if status == 2{
+      break
+    }
+  }
 }
 
 func (i Incidencia)Valido() (bool){
@@ -110,4 +147,28 @@ func (i Incidencia)Valido() (bool){
 
 func (i1 Incidencia)Igual(i2 Incidencia) (bool){
   return i1.Id == i2.Id
+}
+
+func (i Incidencia)TieneMecanico(m_in Mecanico) (bool){
+  var tiene bool = false
+
+  for _, m := range i.Mecanicos{
+    fmt.Println(m.Info())
+    if m.Igual(m_in){
+      tiene = true
+    }
+  }
+
+  return tiene
+}
+
+func (i *Incidencia)AsignarMecanico(m Mecanico){
+  if !i.TieneMecanico(m){
+    i.Mecanicos = append(i.Mecanicos, m)
+    if i.Estado == 1{
+      i.Estado = 2
+    }
+  } else {
+    utils.ErrorMsg("El mecánico ya esta incidencia asignada")
+  }
 }

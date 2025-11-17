@@ -25,7 +25,14 @@ func (v Vehiculo)Visualizar(){
   fmt.Printf("%sModelo: %s%s\n", utils.BOLD, utils.END, v.Modelo)
   fmt.Printf("%sFecha de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaEntrada)
   fmt.Printf("%sFecha estimada de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaSalida)
-  // Incidencias
+  utils.BoldMsg("Incidencias: ")
+  if len(v.Incidencias) > 0{
+    for _, inc := range v.Incidencias{
+      fmt.Printf("  ·", inc.Info())
+    }
+  } else {
+    utils.BoldMsg("SIN INCIDENCIAS")
+  }
 }
 
 func (v *Vehiculo)Menu(){
@@ -176,6 +183,30 @@ func (v *Vehiculo)MenuIncidencias(){
   }
 }
 
+func (v Vehiculo)ObtenerIncidencia() (Incidencia){
+  var inc Incidencia
+  
+  menu := []string{"Seleccione una incidencia"}
+
+  for{
+    menu = []string{"Seleccione una incidencia"}
+    for _, i := range v.Incidencias{
+      menu = append(menu, i.Info())
+    }
+
+    opt, status := utils.MenuFunc(menu)
+
+    if status != 1{
+      if status == 0{
+        inc = v.Incidencias[opt - 1]
+      }
+      break
+    }
+  }
+
+  return inc
+}
+
 func (v Vehiculo)ObtenerIndiceIncidencia(i_in Incidencia) (int){
   var res int = -1
 
@@ -202,5 +233,25 @@ func (v Vehiculo)Valido() (bool){
 
 func (v1 Vehiculo)Igual(v2 Vehiculo) (bool){
   return v1.Matricula == v2.Matricula
+}
+
+func (v Vehiculo)StringEstado() (string){
+  var estado string = fmt.Sprintf("%s•%s", utils.GREEN, utils.END)
+  var cerrado bool = true
+
+  for _, inc := range v.Incidencias{
+    if inc.Estado == 2{
+      estado = fmt.Sprintf("%s•%s", utils.YELLOW, utils.END)
+      return estado
+    } else if inc.Estado == 1{
+      cerrado = false
+    }
+  }
+
+  if cerrado{
+    estado = fmt.Sprintf("%s•%s", utils.RED, utils.END)
+  }
+
+  return estado
 }
 
