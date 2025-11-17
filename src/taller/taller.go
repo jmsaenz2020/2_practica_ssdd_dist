@@ -328,7 +328,8 @@ func (t *Taller)EliminarMecanico(m Mecanico){
     
   if indice >= 0{ // Eliminar
     lista := t.Mecanicos
-    lista = lista[:indice+copy(lista[indice:], lista[indice+1:])]
+    lista[indice] = lista[len(lista)-1]
+    lista = lista[:len(lista)-1]
     t.Mecanicos = lista
   } else {
     utils.ErrorMsg("No se pudo eliminar al mecánico")

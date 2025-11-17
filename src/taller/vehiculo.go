@@ -173,13 +173,38 @@ func (v *Vehiculo)MenuIncidencias(){
         i.Inicializar()
         v.CrearIncidencia(i)
       } else if opt == 2{
-        // Eliminar incidencia
+        i = v.SeleccionarIncidencia()
+        v.EliminarIncidencia(i)
       } else {
         v.Incidencias[opt - 3].Menu()
       }
     } else if status == 2{
       break
     }
+  }
+}
+
+func (v Vehiculo)SeleccionarIncidencia() (Incidencia){
+  var i Incidencia
+
+  if len(v.Incidencias) > 0{
+    i = v.Incidencias[0]
+  }
+
+  return i
+}
+
+func (v *Vehiculo)EliminarIncidencia(i Incidencia){
+
+  indice := v.ObtenerIndiceIncidencia(i)
+    
+  if indice >= 0{ // Eliminar
+    lista := v.Incidencias
+    lista[indice] = lista[len(lista)-1]
+    lista = lista[:len(lista)-1]
+    v.Incidencias = lista
+  } else {
+    utils.ErrorMsg("No se pudo eliminar la incidencia")
   }
 }
 

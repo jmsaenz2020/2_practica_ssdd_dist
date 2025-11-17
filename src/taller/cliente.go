@@ -88,7 +88,10 @@ func (c *Cliente)MenuVehiculos(){
         v.Inicializar()
         c.CrearVehiculo(v)
       } else if opt == 2{
-        // Eliminar vehiculo
+        v = c.SeleccionarVehiculo()
+        if v.Valido(){
+          c.EliminarVehiculo(v)
+        }
       } else {
         c.Vehiculos[opt - 3].Menu()
       }
@@ -103,6 +106,30 @@ func (c *Cliente)CrearVehiculo(v Vehiculo){
     c.Vehiculos = append(c.Vehiculos, v)
   } else {
     utils.ErrorMsg("No se ha podido crear el vehículo")
+  }
+}
+
+func (c Cliente)SeleccionarVehiculo() (Vehiculo){
+  var v Vehiculo  
+
+  if len(c.Vehiculos) > 0{
+    v = c.Vehiculos[0]
+  }
+
+  return v
+}
+
+func (c *Cliente)EliminarVehiculo(v Vehiculo){
+
+  indice := c.ObtenerIndiceVehiculo(v)
+    
+  if indice >= 0{ // Eliminar
+    lista := c.Vehiculos
+    lista[indice] = lista[len(lista)-1]
+    lista = lista[:len(lista)-1]
+    c.Vehiculos = lista
+  } else {
+    utils.ErrorMsg("No se pudo eliminar al vehículo")
   }
 }
 
