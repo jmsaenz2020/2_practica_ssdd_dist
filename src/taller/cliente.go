@@ -2,6 +2,7 @@ package taller
 
 import (
   "fmt"
+  "time"
   "2_practica_ssdd_dist/utils"
 )
 
@@ -102,6 +103,8 @@ func (c *Cliente)MenuVehiculos(){
 }
 
 func (c *Cliente)CrearVehiculo(v Vehiculo){
+  v.TiempoAcumulado <- time.Duration
+
   if v.Valido() && c.ObtenerIndiceVehiculo(v) == -1{
     c.Vehiculos = append(c.Vehiculos, v)
   } else {

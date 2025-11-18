@@ -2,6 +2,7 @@ package taller
 
 import (
   "fmt"
+  "time"
   "2_practica_ssdd_dist/utils"
 )
 
@@ -13,6 +14,7 @@ type Vehiculo struct{
   FechaEntrada string
   FechaSalida string
   Incidencias []Incidencia
+  TiempoAcumulado chan time.Duration
 }
 
 func (v Vehiculo)Info() (string){
@@ -25,6 +27,7 @@ func (v Vehiculo)Visualizar(){
   fmt.Printf("%sModelo: %s%s\n", utils.BOLD, utils.END, v.Modelo)
   fmt.Printf("%sFecha de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaEntrada)
   fmt.Printf("%sFecha estimada de entrada: %s%s\n", utils.BOLD, utils.END, v.FechaSalida)
+  fmt.Printf("%sTiempo acumulado: %s%d\n", utils.BOLD, utils.END, v.TiempoAcumulado)
   utils.BoldMsg("Incidencias: ")
   if len(v.Incidencias) > 0{
     for _, inc := range v.Incidencias{
@@ -151,7 +154,7 @@ func (v *Vehiculo)Modificar(){
 }
 
 func (v *Vehiculo)MenuIncidencias(){
-  var i Incidencia  
+  var i Incidencia
   menu := []string{
     "Seleccione una incidencia",
     "Crear incidencia",
@@ -172,6 +175,7 @@ func (v *Vehiculo)MenuIncidencias(){
       if opt == 1{
         i.Inicializar()
         v.CrearIncidencia(i)
+        go i.EjecutarIncidencia(v.TiempoAcumulado)
       } else if opt == 2{
         i = v.SeleccionarIncidencia()
         v.EliminarIncidencia(i)
@@ -247,6 +251,7 @@ func (v Vehiculo)ObtenerIndiceIncidencia(i_in Incidencia) (int){
 func (v *Vehiculo)CrearIncidencia(i Incidencia){
   if i.Valido() && v.ObtenerIndiceIncidencia(i) == -1{
     v.Incidencias = append(v.Incidencias, i)
+    go v.Incidencias[len(v.Incidencias) - 1].EjecutarIncidencia(v.TiempoAcumulado)
   } else {
     utils.ErrorMsg("No se ha podido crear el vehículo")
   }

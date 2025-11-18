@@ -2,6 +2,7 @@ package taller
 
 import (
   "fmt"
+  "time"
   "2_practica_ssdd_dist/utils"
 )
 
@@ -138,6 +139,22 @@ func (i *Incidencia)Modificar(){
     } else if status == 2{
       break
     }
+  }
+}
+
+func (i Incidencia)EjecutarIncidencia(tVehiculo chan time.Duration){
+  var t1 time.Time
+  var t2 time.Time
+  var diff time.Duration
+
+  for{
+    t1 = time.Now()
+    diff = <- tVehiculo
+    time.Sleep(time.Second)
+    t2 = time.Now()
+    diff = t2.Sub(t1)
+    fmt.Println(diff)
+    tVehiculo <- diff
   }
 }
 
